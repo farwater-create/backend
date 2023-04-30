@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String?
+  email                String?               @unique
+  emailVerified        DateTime?
+  image                String?
+  minecraftAccount     MinecraftAccount?
+  purchases            Purchase[]
+  serverAuthorizations ServerAuthorization[]
+}
+
+model Server {
+  id             String                @id
+  name           String
+  authorizations ServerAuthorization[]
+}
+
+model ServerAuthorization {
+  id        String    @id @default(cuid())
+  serverId  String
+  userId    String
+  createdAt DateTime  @default(now())
+  voidedAt  DateTime?
+  server    Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+  @@index([serverId], map: "ServerAuthorization_serverId_fkey")
+  @@index([userId], map: "ServerAuthorization_userId_fkey")
+}
+
+model MinecraftAccount {
+  id      String @id
+  name    String
+  ownerId String @unique
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model Purchase {
+  id            String    @id @default(cuid())
+  transactionId String
+  price         Decimal
+  sku           String
+  name          String
+  description   String
+  userId        String
+  createdAt     DateTime  @default(now())
+  voidedAt      DateTime?
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "Purchase_userId_fkey")
+}
