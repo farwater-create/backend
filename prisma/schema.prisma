@@ -13,7 +13,7 @@ model User {
   email                String?               @unique
   emailVerified        DateTime?
   image                String?
-  minecraftAccount     MinecraftAccount?
+  minecraftAccount     MinecraftAccount[]
   purchases            Purchase[]
   serverAuthorizations ServerAuthorization[]
 }
@@ -40,7 +40,6 @@ model ServerAuthorization {
 
 model MinecraftAccount {
   id      String @id
-  name    String
   ownerId String @unique
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
