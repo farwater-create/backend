@@ -1,0 +1,11 @@
+services:
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_USER: "dev"
+      MARIADB_PASSWORD: "dev"
+      MARIADB_ROOT_PASSWORD: "dev"
+      MARIADB_DATABASE: "farwater"
+    ports:
+      - "127.0.0.1:3306:3306"
