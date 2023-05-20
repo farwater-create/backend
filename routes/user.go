@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 
+	"github.com/farwater-create/backend/apiperms"
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 func PostUser(ctx *gin.Context) {
 	postUserInput := &models.PostUserInput{}
 
-	if !models.BindJSON(ctx, postUserInput) {
+	if !BindJSON(ctx, postUserInput) {
 		return
 	}
 
@@ -30,16 +31,34 @@ func PostUser(ctx *gin.Context) {
 		return
 	}
 
-	models.Create(ctx, user)
+	tx = models.DB.Create(user)
+	if tx.Error != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, InternalServerError)
+		return
+	}
+
+	permissions, ok := ApiTokenPermissions(ctx)
+	if !ok {
+		return
+	}
+
+	json := gin.H{
+		"id":        user.ID,
+		"createdAt": user.CreatedAt,
+	}
+
+	if permissions[apiperms.UserAge] {
+		json["birthday"] = user.Birthday
+	}
+
+	ctx.AbortWithStatusJSON(http.StatusOK, json)
 }
 
 func GetUser(ctx *gin.Context) {
 	query, exists := ctx.Params.Get("id")
 
 	if !exists {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "bad request",
-		})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, BadRequestError)
 		return
 	}
 
@@ -47,15 +66,25 @@ func GetUser(ctx *gin.Context) {
 
 	tx := models.DB.Where("discord_id = (?) OR minecraft_uuid = (?) OR id = (?)", query, query, query).Find(user)
 	if tx.RowsAffected <= 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error": "not found",
-		})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, NotFoundError)
 		return
 	}
 
-	ctx.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"discordID":     user.DiscordID,
-		"minecraftUUID": user.MinecraftUUID,
-		"id":            user.ID,
-	})
+	permissions, ok := ApiTokenPermissions(ctx)
+
+	if !ok {
+		return
+	}
+	json :=
+		gin.H{
+			"discordID":     user.DiscordID,
+			"minecraftUUID": user.MinecraftUUID,
+			"id":            user.ID,
+		}
+
+	if permissions[apiperms.UserAge] {
+		json["birthday"] = user.Birthday
+	}
+
+	ctx.AbortWithStatusJSON(http.StatusOK, json)
 }
