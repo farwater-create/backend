@@ -2,12 +2,10 @@ package models
 
 import (
 	"github.com/farwater-create/backend/config"
-	"github.com/go-playground/validator/v10"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var validate = validator.New()
 var DB *gorm.DB
 
 type DSNOptions struct {
@@ -28,6 +26,7 @@ func ConnectDatabase() {
 	}
 
 	database.AutoMigrate(&User{})
+	database.AutoMigrate(&ApiKey{})
 
 	DB = database
 }
