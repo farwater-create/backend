@@ -1,12 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -25,7 +25,7 @@ func init() {
 	godotenv.Load()
 	validate := validator.New()
 	err := validate.Struct(Environment)
-	fmt.Println(err)
+	logrus.Error(err)
 	if err != nil {
 		panic(err)
 	}

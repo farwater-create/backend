@@ -2,11 +2,11 @@ package kofi
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type KofiPaymentRequestForm struct {
@@ -25,7 +25,7 @@ func POST(ctx *gin.Context) {
 	err := json.Unmarshal([]byte(kofiPaymentRequestForm.Data), kofiShopOrder)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
-		fmt.Println(err)
+		logrus.Error(err)
 		return
 	}
 	ctx.AbortWithStatus(http.StatusOK)

@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -39,11 +38,9 @@ func ApiKeyMiddleware(permissions []string) gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Println(apiKey.Permissions)
 		userPermissions := strings.Split(apiKey.Permissions, ";")
 		permissionsMap := make(map[apiperms.ApiPermission]bool)
 		for _, p := range userPermissions {
-			fmt.Println(p)
 			permissionsMap[p] = true
 		}
 		for _, p := range permissions {

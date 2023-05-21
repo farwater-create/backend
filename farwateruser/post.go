@@ -14,14 +14,14 @@ import (
 var ErrorUserExists = errors.New("discord id or minecraft uuid already exists")
 var ErrorInternal = errors.New("internal server error")
 
-type CreateUserOptions struct {
-	DiscordID     string
-	MinecraftUUID string
-	Birthday      time.Time
+type PostUserInput struct {
+	DiscordID     string    `json:"discordID" validate:"required"`
+	MinecraftUUID string    `json:"minecraftUUID" validate:"required"`
+	Birthday      time.Time `json:"birthday" validate:"required"`
 }
 
 func POST(ctx *gin.Context) {
-	postUserInput := &models.PostUserInput{}
+	postUserInput := &PostUserInput{}
 
 	if !httputils.BindJSON(ctx, postUserInput) {
 		return
