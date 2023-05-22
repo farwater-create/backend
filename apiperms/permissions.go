@@ -7,4 +7,5 @@ const (
 	GetUser      ApiPermission = "get_user"
 	UserAge      ApiPermission = "user_age"
 	Applications ApiPermission = "applications"
+	Grant        ApiPermission = "grant"
 )

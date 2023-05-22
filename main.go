@@ -14,6 +14,7 @@ func main() {
 	r.GET("/v1/user/:id", middleware.ApiKeyMiddleware([]string{apiperms.GetUser}), farwateruser.GET)
 	r.POST("/v1/application", middleware.ApiKeyMiddleware([]string{apiperms.Applications}))
 	r.POST("/v1/application/:id", middleware.ApiKeyMiddleware([]string{apiperms.Applications}))
+	r.GET("/v1/apikey", middleware.ApiKeyMiddleware([]string{apiperms.Grant}))
 	r.POST("/v1/kofi", kofi.POST)
 	r.Run()
 }
