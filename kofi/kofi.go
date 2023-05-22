@@ -22,8 +22,6 @@ func init() {
 			listener(order)
 		}
 	})
-	AddEventListener(EventSubscription, GrantClaimBlocks)
-	AddEventListener(EventSubscription, WhitelistPremium)
 }
 
 func AddEventListener(event KofiEvent, listener KofiShopOrderProcessor) {
