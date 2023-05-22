@@ -3,13 +3,12 @@ package httputils
 import (
 	"net/http"
 
-	"github.com/farwater-create/backend/apiperms"
 	"github.com/gin-gonic/gin"
 )
 
-func ApiTokenPermissions(ctx *gin.Context) (permissions map[apiperms.ApiPermission]bool, ok bool) {
+func ApiTokenPermissions(ctx *gin.Context) (permissions map[string]bool, ok bool) {
 	_p, exists := ctx.Get("permissions")
-	permissions, ok = _p.(map[apiperms.ApiPermission]bool)
+	permissions, ok = _p.(map[string]bool)
 	if !exists || !ok {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, InternalServerError)
 		return permissions, false
