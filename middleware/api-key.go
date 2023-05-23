@@ -7,11 +7,12 @@ import (
 	"github.com/farwater-create/backend/apiperms"
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func ApiKeyMiddleware(permissions []string) gin.HandlerFunc {
-
 	return func(ctx *gin.Context) {
+		db := ctx.MustGet("db").(*gorm.DB)
 		authHeader := strings.Split(ctx.Request.Header.Get("Authorization"), "Bearer")
 
 		if len(authHeader) != 2 {
@@ -31,7 +32,7 @@ func ApiKeyMiddleware(permissions []string) gin.HandlerFunc {
 			return
 		}
 		apiKey := &models.ApiKey{}
-		tx := models.DB.Where("`key` = ?", authorization).First(apiKey)
+		tx := db.Where("`key` = ?", authorization).First(apiKey)
 		if tx.RowsAffected <= 0 {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "unauthorized",
