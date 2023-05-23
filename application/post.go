@@ -7,12 +7,8 @@ import (
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
-
-type PostApplicationInput struct {
-	UserID uint   `json:"userId"`
-	Reason string `json:"reason" validate:"required"`
-}
 
 func POST(ctx *gin.Context) {
 	applicationInput := &PostApplicationInput{}
@@ -24,7 +20,8 @@ func POST(ctx *gin.Context) {
 		Status: "pending",
 		Reason: applicationInput.Reason,
 	}
-	tx := models.DB.Create(application)
+	db := ctx.MustGet("db").(*gorm.DB)
+	tx := db.Create(application)
 	if tx.Error != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
 		logrus.Error(tx.Error)

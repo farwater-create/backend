@@ -7,6 +7,7 @@ import (
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 func GET(ctx *gin.Context) {
@@ -16,7 +17,8 @@ func GET(ctx *gin.Context) {
 		return
 	}
 	application := &models.Application{}
-	tx := models.DB.Find(application, "WHERE id = (?)", applicationId)
+	db := ctx.MustGet("db").(*gorm.DB)
+	tx := db.Find(application, "WHERE id = (?)", applicationId)
 	if tx.Error != nil {
 		logrus.Error(tx.Error)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)

@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -16,19 +15,18 @@ type Config struct {
 	SALT                    string `validate:"required"`
 }
 
-var Environment Config = Config{
-	MARIADB_DSN:             os.Getenv("MARIADB_DSN"),
-	PORT:                    os.Getenv("PORT"),
-	KOFI_VERIFICATION_TOKEN: os.Getenv("KOFI_VERIFICATION_TOKEN"),
-	SALT:                    os.Getenv("SALT"),
-}
-
-func init() {
+func New() (Config, error) {
 	godotenv.Load()
-	validate := validator.New()
-	err := validate.Struct(Environment)
-	logrus.Error(err)
-	if err != nil {
-		panic(err)
+	config := Config{
+		MARIADB_DSN:             os.Getenv("MARIADB_DSN"),
+		PORT:                    os.Getenv("PORT"),
+		KOFI_VERIFICATION_TOKEN: os.Getenv("KOFI_VERIFICATION_TOKEN"),
+		SALT:                    os.Getenv("SALT"),
 	}
+	validate := validator.New()
+	err := validate.Struct(config)
+	if err != nil {
+		return config, err
+	}
+	return config, nil
 }

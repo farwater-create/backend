@@ -9,6 +9,7 @@ import (
 	"github.com/farwater-create/backend/httputils"
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 var ErrorUserExists = errors.New("discord id or minecraft uuid already exists")
@@ -32,8 +33,8 @@ func POST(ctx *gin.Context) {
 		MinecraftUUID: postUserInput.MinecraftUUID,
 		Birthday:      postUserInput.Birthday,
 	}
-
-	tx := models.DB.Where("discord_id = (?) OR minecraft_uuid = (?)", postUserInput.DiscordID, postUserInput.MinecraftUUID).First(user)
+	db := ctx.MustGet("db").(*gorm.DB)
+	tx := db.Where("discord_id = (?) OR minecraft_uuid = (?)", postUserInput.DiscordID, postUserInput.MinecraftUUID).First(user)
 	exists := tx.RowsAffected > 0
 
 	if exists {
@@ -43,7 +44,7 @@ func POST(ctx *gin.Context) {
 		return
 	}
 
-	tx = models.DB.Create(user)
+	tx = db.Create(user)
 	if tx.Error != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
 		return

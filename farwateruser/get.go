@@ -7,6 +7,7 @@ import (
 	"github.com/farwater-create/backend/httputils"
 	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GET(ctx *gin.Context) {
@@ -18,8 +19,8 @@ func GET(ctx *gin.Context) {
 	}
 
 	user := &models.User{}
-
-	tx := models.DB.Where("discord_id = (?) OR minecraft_uuid = (?) OR id = (?)", query, query, query).Find(user)
+	db := ctx.MustGet("db").(*gorm.DB)
+	tx := db.Where("discord_id = (?) OR minecraft_uuid = (?) OR id = (?)", query, query, query).Find(user)
 	if tx.RowsAffected <= 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, httputils.NotFoundError)
 		return

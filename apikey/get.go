@@ -2,12 +2,11 @@ package apikey
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/farwater-create/backend/httputils"
-	"github.com/farwater-create/backend/models"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type GetApiKeyInput struct {
@@ -15,34 +14,22 @@ type GetApiKeyInput struct {
 	Permissions []string `json:"permissions" validate:"required"`
 }
 
-func Create(user uint, permissions []string) (*models.ApiKey, error) {
-	u, err := uuid.NewRandom()
-	if err != nil {
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-	apiKey := &models.ApiKey{
-		UserID:      user,
-		Key:         u.String(),
-		Permissions: strings.Join(permissions, ";"),
-	}
-	tx := models.DB.Create(apiKey)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return apiKey, nil
-}
-
 func GET(ctx *gin.Context) {
 	getApiKeyInput := &GetApiKeyInput{}
 	if !httputils.BindJSON(ctx, getApiKeyInput) {
 		return
 	}
-	apiKey, err := Create(getApiKeyInput.UserID, getApiKeyInput.Permissions)
+	apiKey, err := New(getApiKeyInput.UserID, getApiKeyInput.Permissions)
+	db := ctx.MustGet("db").(*gorm.DB)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
+		logrus.Error(err)
+		return
+	}
+	tx := db.Create(apiKey)
+	if err = tx.Error; err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
+		logrus.Error(err)
 		return
 	}
 	ctx.AbortWithStatusJSON(http.StatusOK, apiKey)
