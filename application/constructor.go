@@ -3,7 +3,7 @@ package application
 import "github.com/farwater-create/backend/models"
 
 type PostApplicationInput struct {
-	UserID uint   `json:"userId"`
+	UserID uint   `json:"userId" validate:"required"`
 	Reason string `json:"reason" validate:"required"`
 }
 

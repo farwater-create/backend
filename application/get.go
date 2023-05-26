@@ -2,6 +2,7 @@ package application
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/farwater-create/backend/httputils"
 	"github.com/farwater-create/backend/models"
@@ -11,21 +12,31 @@ import (
 )
 
 func GET(ctx *gin.Context) {
-	applicationId, exists := ctx.Params.Get("id")
+	applicationIdStr, exists := ctx.Params.Get("id")
 	if !exists {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, httputils.NotFoundError)
 		return
 	}
-	application := &models.Application{}
+	applicationId, err := strconv.Atoi(applicationIdStr)
+	if err != nil {
+		logrus.Error(err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
+		return
+	}
+	application := &models.Application{
+		Model: gorm.Model{
+			ID: uint(applicationId),
+		},
+	}
 	db := ctx.MustGet("db").(*gorm.DB)
-	tx := db.Find(application, "WHERE id = (?)", applicationId)
+	tx := db.First(application, applicationId)
 	if tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, httputils.NotFoundError)
+			return
+		}
 		logrus.Error(tx.Error)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, httputils.InternalServerError)
-	}
-	if tx.RowsAffected <= 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, httputils.NotFoundError)
-		return
 	}
 	ctx.AbortWithStatusJSON(http.StatusOK, application)
 }
